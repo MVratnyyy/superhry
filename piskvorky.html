@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Piškvorky</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f0f0f0;
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 36px;
+      color: #333;
+    }
+
+    .board {
+      display: grid;
+      grid-template-columns: repeat(3, 100px);
+      grid-gap: 5px;
+      margin: 20px auto;
+      max-width: 300px;
+    }
+
+    .cell {
+      width: 100px;
+      height: 100px;
+      font-size: 36px;
+      text-align: center;
+      vertical-align: middle;
+      cursor: pointer;
+      border: 3px solid #ccc;
+      background-color: #fff;
+      color: #333;
+      transition: background-color 0.3s ease-in-out, color 0.3s ease-in-out;
+    }
+
+    .cell:hover {
+      background-color: #ddd;
+    }
+
+    #winner {
+      font-size: 24px;
+      color: #333;
+      margin-top: 20px;
+    }
+
+    #restart {
+      display: block;
+      margin: 20px auto;
+      padding: 10px 20px;
+      font-size: 18px;
+      background-color: #007bff;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      transition: background-color 0.3s ease-in-out, color 0.3s ease-in-out;
+    }
+
+    #restart:hover {
+      background-color: #0056b3;
+    }
+
+    #backToHome {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      padding: 10px 20px;
+      font-size: 18px;
+      background-color: #333;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      transition: background-color 0.3s ease-in-out, color 0.3s ease-in-out;
+    }
+
+    #backToHome:hover {
+      background-color: #555;
+    }
+  </style>
+</head>
+<body>
+  <h1>Piškvorky</h1>
+  <a id="backToHome" href="#">ZPĚT NA ÚVOD</a>
+  <div class="board" id="board"></div>
+  <button id="restart">Hrát znovu</button>
+  <p id="winner"></p>
+
+  <script>
+    const board = document.getElementById('board');
+    const cells = [];
+    const restartButton = document.getElementById('restart');
+    const winnerText = document.getElementById('winner');
+    const backButton = document.getElementById('backToHome');
+    let currentPlayer = 'X';
+    let winner = null;
+    let moves = 0;
+
+    // Vytvoření pole pro herní desku
+    for (let i = 0; i < 3; i++) {
+      for (let j = 0; j < 3; j++) {
+        const cell = document.createElement('div');
+        cell.classList.add('cell');
+        cell.dataset.row = i;
+        cell.dataset.col = j;
+        cell.addEventListener('click', handleCellClick);
+        board.appendChild(cell);
+        cells.push(cell);
+      }
+    }
+
+    // Obsluha kliknutí na buňku
+    function handleCellClick(e) {
+      const cell = e.target;
+      const row = cell.dataset.row;
+      const col = cell.dataset.col;
+
+      if (cell.textContent || winner) return;
+
+      cell.textContent = currentPlayer;
+      cell.style.backgroundColor = currentPlayer === 'X' ? '#007bff' : '#ff4500';
+      cell.style.color = '#fff';
+      moves++;
+
+      if (checkWinner(row, col)) {
+        winner = currentPlayer;
+        winnerText.textContent = `Vítěz: ${winner}`;
+      } else if (moves === 9) {
+        winnerText.textContent = 'Remíza!';
+      } else {
+        currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+      }
+    }
+
+    // Funkce pro kontrolu vítěze
+    function checkWinner(row, col) {
+      return (
+        checkDirection(row, col, 0, 1) ||
+        checkDirection(row, col, 1, 0) ||
+        checkDirection(row, col, 1, 1) ||
+        checkDirection(row, col, -1, 1)
+      );
+    }
+
+    function checkDirection(row, col, dirX, dirY) {
+      const player = currentPlayer;
+      for (let i = 1; i < 3; i++) {
+        const newRow = parseInt(row) + dirX * i;
+        const newCol = parseInt(col) + dirY * i;
+        const nextCell = cells.find(
+          cell => cell.dataset.row === newRow && cell.dataset.col === newCol
+        );
+        if (!nextCell || nextCell.textContent !== player) {
+          return false;
+        }
+      }
+      return true;
+    }
+
+    // Obsluha tlačítka pro restart
+    restartButton.addEventListener('click', () => {
+      cells.forEach(cell => {
+        cell.textContent = '';
+        cell.style.backgroundColor = '#fff';
+        cell.style.color = '#333';
+      });
+      winnerText.textContent = '';
+      currentPlayer = 'X';
+      winner = null;
+      moves = 0;
+    });
+
+    // Návrat na úvodní stránku
+    backButton.addEventListener('click', () => {
+      window.location.href = "index.html"; // Zde nahraďte odkazem na úvodní stránku
+    });
+  </script>
+</body>
+</html>
