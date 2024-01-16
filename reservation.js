@@ -11,12 +11,17 @@ document.addEventListener('DOMContentLoaded', function () {
             if (reservations[key]) {
                 const listItem = document.createElement('li');
                 listItem.textContent = key;
+                listItem.className = 'cursor-pointer text-blue-500 hover:underline';
+                listItem.addEventListener('click', function () {
+                    // Při kliknutí na rezervaci v seznamu se zavolá funkce pro úpravu
+                    editReservation(key);
+                });
                 myReservationsList.appendChild(listItem);
             }
         }
     }
 
-    // Funkce pro aktualizaci nabídky editace rezervace
+    // Funkce pro aktualizaci nabídky editace
     function updateEditOptions() {
         const timeSelect = document.getElementById('editTime');
         timeSelect.innerHTML = '';
@@ -29,6 +34,37 @@ document.addEventListener('DOMContentLoaded', function () {
                 timeSelect.appendChild(timeOption);
             }
         }
+    }
+
+    // Funkce pro odebrání rezervace z nabídky
+    function removeTimeOption(time) {
+        const timeSelect = document.getElementById('time');
+        const optionToRemove = timeSelect.querySelector(`option[value="${time}"]`);
+
+        if (optionToRemove) {
+            timeSelect.removeChild(optionToRemove);
+        }
+    }
+
+    // Funkce pro úpravu rezervace
+    function editReservation(key) {
+        const editDate = document.getElementById('editDate');
+        const editTime = document.getElementById('editTime');
+        const [date, time] = key.split(' ');
+
+        // Nastavení aktuálních hodnot pro editaci
+        editDate.value = date;
+        editTime.value = time;
+
+        // Odstranění původní rezervace z nabídky
+        removeTimeOption(time);
+
+        // Zrušení původní rezervace
+        reservations[key] = false;
+        localStorage.setItem('reservations', JSON.stringify(reservations));
+
+        // Aktualizace nabídky editace
+        updateEditOptions();
     }
 
     // Inicializace seznamu rezervací a nabídky editace
@@ -69,10 +105,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         // Kontrola, zda termín není již rezervovaný
         if (!reservations[editKey]) {
-            // Odebrání původní rezervace z nabídky
-            removeTimeOption(editTime);
-
-            // Upravení rezervace v local storage
+            // Uložení upravené rezervace do local storage
             reservations[editKey] = true;
             localStorage.setItem('reservations', JSON.stringify(reservations));
 
